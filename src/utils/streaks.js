@@ -47,3 +47,13 @@ export const calculateStreaks = (completions) => {
 
 export const getLast7Days = (today) =>
   Array.from({ length: 7 }, (_, i) => offsetDate(today, i - 6))
+
+export const getWeekDays = (today) => {
+  const d = new Date(today)
+  const dayOfWeek = d.getUTCDay() // 0=Sun
+  return Array.from({ length: 7 }, (_, i) => {
+    const nd = new Date(d)
+    nd.setUTCDate(d.getUTCDate() - dayOfWeek + i)
+    return nd.toISOString().split('T')[0]
+  })
+}

@@ -1,13 +1,36 @@
+import { useState } from 'react'
 import HabitCard from './HabitCard'
 
+const CATEGORY_ORDER = ['Fitness', 'Mindfulness', 'Learning', 'Productivity', 'Drinking', 'Running']
+
 export default function HabitList({ habits, today, t, onToggle, onEdit, onDelete }) {
-  const incomplete = habits.filter((h) => !h.completions.includes(today))
-  const complete = habits.filter((h) => h.completions.includes(today))
+  const [activeTab, setActiveTab] = useState('All')
+
+  const presentCategories = CATEGORY_ORDER.filter((cat) => habits.some((h) => h.category === cat))
+  const tabs = ['All', ...presentCategories]
+  const validTab = tabs.includes(activeTab) ? activeTab : 'All'
+
+  const filtered = validTab === 'All' ? habits : habits.filter((h) => h.category === validTab)
+  const incomplete = filtered.filter((h) => !h.completions.includes(today))
+  const complete = filtered.filter((h) => h.completions.includes(today))
   const sorted = [...incomplete, ...complete]
 
   return (
     <section className="habit-list">
-      <h2 className="habit-list__heading">{t.allHabits}</h2>
+      <div className="category-tabs" role="tablist" aria-label="Filter by category">
+        {tabs.map((cat) => (
+          <button
+            key={cat}
+            role="tab"
+            aria-selected={validTab === cat}
+            className={`category-tab${validTab === cat ? ' category-tab--active' : ''}`}
+            onClick={() => setActiveTab(cat)}
+          >
+            {cat === 'All' ? t.all : (t.categories[cat] || cat)}
+          </button>
+        ))}
+      </div>
+
       <div className="habit-list__grid">
         {sorted.map((habit) => (
           <HabitCard

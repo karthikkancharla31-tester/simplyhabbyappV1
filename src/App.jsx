@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from './components/Header'
 import Dashboard from './components/Dashboard'
 import HabitList from './components/HabitList'
@@ -8,6 +8,9 @@ import { loadHabits, saveHabits, loadLanguage, saveLanguage } from './utils/stor
 import { getTodayString } from './utils/streaks'
 import translations from './i18n/translations'
 import './App.css'
+import Toast from './components/Toast'
+import { calculateStreaks } from './utils/streaks'
+import { generateMotivation } from './utils/anthropic'
 
 export const CATEGORIES = ['Fitness', 'Mindfulness', 'Learning', 'Productivity', 'Drinking', 'Running']
 
@@ -16,6 +19,8 @@ function App() {
   const [language, setLanguage] = useState('en')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState(null)
+  const [toast, setToast] = useState(null)
+  const abortRef = useRef(null)
 
   const t = translations[language]
   const today = getTodayString()
@@ -60,16 +65,33 @@ function App() {
     saveHabits(updated)
   }
 
-  const handleToggleComplete = (id) => {
+  const handleToggleComplete = async (id, date = today) => {
+    const habit = habits.find((h) => h.id === id)
+    const wasComplete = habit.completions.includes(date)
+
     const updated = habits.map((h) => {
       if (h.id !== id) return h
-      const completions = h.completions.includes(today)
-        ? h.completions.filter((d) => d !== today)
-        : [...h.completions, today]
+      const completions = wasComplete
+        ? h.completions.filter((d) => d !== date)
+        : [...h.completions, date]
       return { ...h, completions }
     })
     setHabits(updated)
     saveHabits(updated)
+
+    if (!wasComplete && date === today) {
+      const { currentStreak } = calculateStreaks([...habit.completions, today])
+      abortRef.current?.abort()
+      abortRef.current = new AbortController()
+      setToast({ habitName: habit.name, category: habit.category, streak: currentStreak, message: null })
+      const message = await generateMotivation({
+        habitName: habit.name,
+        category: habit.category,
+        currentStreak,
+        signal: abortRef.current.signal,
+      })
+      setToast((prev) => prev ? { ...prev, message: message || 'Great job completing your habit!' } : null)
+    }
   }
 
   const openAddModal = () => {
@@ -124,6 +146,8 @@ function App() {
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
 
       {modalOpen && (
         <HabitModal

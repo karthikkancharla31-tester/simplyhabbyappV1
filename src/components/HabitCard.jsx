@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { calculateStreaks, getLast7Days } from '../utils/streaks'
+import { calculateStreaks, getWeekDays } from '../utils/streaks'
+
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 const CATEGORY_STYLES = {
   Fitness:      { bg: '#dbeafe', color: '#1d4ed8' },
@@ -43,7 +45,7 @@ export default function HabitCard({ habit, today, t, onToggle, onEdit, onDelete 
 
   const { currentStreak, longestStreak } = calculateStreaks(habit.completions)
   const isDoneToday = habit.completions.includes(today)
-  const last7 = getLast7Days(today)
+  const weekDays = getWeekDays(today)
   const catStyle = CATEGORY_STYLES[habit.category] || { bg: '#f3f4f6', color: '#374151' }
   const streakDays = currentStreak === 1 ? t.day : t.days
   const bestDays = longestStreak === 1 ? t.day : t.days
@@ -76,14 +78,24 @@ export default function HabitCard({ habit, today, t, onToggle, onEdit, onDelete 
             {t.categories[habit.category] || habit.category}
           </span>
 
-          <div className="day-dots" aria-label="Last 7 days history">
-            {last7.map((day) => (
-              <span
-                key={day}
-                className={`day-dot${habit.completions.includes(day) ? ' day-dot--done' : ''}${day === today ? ' day-dot--today' : ''}`}
-                aria-label={day}
-              />
-            ))}
+          <div className="day-dots" aria-label="This week">
+            {weekDays.map((date, i) => {
+              const isDone = habit.completions.includes(date)
+              const isToday = date === today
+              const isFuture = date > today
+              return (
+                <div key={date} className="day-col">
+                  <span className="day-label">{DAY_LABELS[i]}</span>
+                  <button
+                    className={`day-dot${isDone ? ' day-dot--done' : ''}${isToday ? ' day-dot--today' : ''}`}
+                    onClick={() => onToggle(habit.id, date)}
+                    disabled={isFuture}
+                    aria-label={`${DAY_LABELS[i]} ${date}`}
+                    aria-pressed={isDone}
+                  />
+                </div>
+              )
+            })}
           </div>
 
           <div className="habit-card__footer">

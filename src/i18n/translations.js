@@ -29,6 +29,7 @@ const translations = {
     selectCategory: 'Select a category',
     confirmYes: 'Delete',
     confirmNo: 'Keep',
+    all: 'All',
     categories: {
       Fitness: 'Fitness',
       Mindfulness: 'Mindfulness',
@@ -68,6 +69,7 @@ const translations = {
     selectCategory: 'Elige una categoría',
     confirmYes: 'Eliminar',
     confirmNo: 'Cancelar',
+    all: 'Todo',
     categories: {
       Fitness: 'Ejercicio',
       Mindfulness: 'Mindfulness',
@@ -107,6 +109,7 @@ const translations = {
     selectCategory: 'Choisir une catégorie',
     confirmYes: 'Supprimer',
     confirmNo: 'Garder',
+    all: 'Tout',
     categories: {
       Fitness: 'Fitness',
       Mindfulness: 'Pleine Conscience',
@@ -146,6 +149,7 @@ const translations = {
     selectCategory: 'カテゴリを選択',
     confirmYes: '削除する',
     confirmNo: 'キャンセル',
+    all: 'すべて',
     categories: {
       Fitness: 'フィットネス',
       Mindfulness: 'マインドフルネス',
