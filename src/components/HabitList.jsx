@@ -10,9 +10,10 @@ export default function HabitList({ habits, today, t, onToggle, onEdit, onDelete
   const tabs = ['All', ...presentCategories]
   const validTab = tabs.includes(activeTab) ? activeTab : 'All'
 
+  const byNewest = (a, b) => Number(b.id) - Number(a.id)
   const filtered = validTab === 'All' ? habits : habits.filter((h) => h.category === validTab)
-  const incomplete = filtered.filter((h) => !h.completions.includes(today))
-  const complete = filtered.filter((h) => h.completions.includes(today))
+  const incomplete = filtered.filter((h) => !h.completions.includes(today)).sort(byNewest)
+  const complete = filtered.filter((h) => h.completions.includes(today)).sort(byNewest)
   const sorted = [...incomplete, ...complete]
 
   return (
